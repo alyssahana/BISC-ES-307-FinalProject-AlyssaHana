@@ -7,24 +7,66 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# Load packages
+library(neonUtilities)
+library(tidyverse)
+
+# option = NOT convert all character variables to factors, helps NEON functions work best
+options(stringsAsFactors=F)
+
+# Read in the megapit data
+Megapit_data <- loadByProduct(dpID = "DP1.00096.001", check.size = F)
+
+# Unlist megapit data to environment in Rstudio
+list2env(Megapit_data, .GlobalEnv)
+
+# Load csv file with NEON site data
+neon_sites <- read_csv("NEON-field-sites.csv")
+
+# Data wrangling: Cleaning up the data for analysis
+soil_data <- mgp_perbiogeosample %>%
+  select(-uid, -remarks) %>%
+  filter(biogeoSampleType=="Regular")
+
+# Join soil_biogeochem and neon_sites
+biogeochem_sites <- soil_data %>%
+  left_join(neon_sites, by = c("domainID","siteID"))
+# Now we have our variables on the same data table
+
+#Plot amount of nitrogen (nitrogenTot) vs temperature (meanAnnualTemp_C)
+ggplot(data = biogeochem_sites) + 
+  geom_point(mapping = aes(x  = meanAnnualTemp_C, y = nitrogenTot, color = domainID)) +
+  labs(x = "Mean Annual Temperature (C)", y = "Nitrogen Conent")
+
 ```
 
-## R Markdown
+```{r}
+# Plot using log so we can get a better look at the relationship
+ggplot(biogeochem_sites, aes(x = log(meanAnnualTemp_C), y = log(nitrogenTot))) +
+  geom_point()+
+  geom_smooth(method = "lm") + #linear regression line
+  labs(x = "log Mean Annual Temperature (C)", y = "log Nitrogen Content")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```
+```{r}
+# Some temperature values are less than 0, and we cannot take the log of a negative number. We can adjust the temperature data so that the values do not equal zero. 
+# The lowest mean annual temperature is -12, so I added 12.2.
+ggplot(biogeochem_sites, aes(x = log(meanAnnualTemp_C + 12.2), y = log(nitrogenTot + 12.2))) +
+  geom_point()+
+  geom_smooth(method = "lm") + #linear regression line
+  labs(x = "log Mean Annual Temperature (C)", y = "log Nitrogen Content")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```
+```{r}
+# Now, do the same thing I did above, but for precipitation!
+# Plot using log so we can get a better look at the relationship
+ggplot(biogeochem_sites, aes(x = log(meanAnnualPrecip_mm), y = log(nitrogenTot))) +
+  geom_point()+
+  geom_smooth(method = "lm") + #linear regression line
+  labs(x = "log Mean Annual Precipitation (mm)", y = "log Nitrogen Content")
 
-```{r cars}
-summary(cars)
+
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
