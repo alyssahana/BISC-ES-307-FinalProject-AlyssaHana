@@ -59,6 +59,25 @@ ggplot(biogeochem_sites, aes(x = log(meanAnnualTemp_C + 12.2), y = log(nitrogenT
 
 ```
 ```{r}
+# Look at the correlation between meanAnnualTemp_C and nitrogenTot
+cor.test((biogeochem_sites$nitrogenTot), (biogeochem_sites$meanAnnualTemp_C))
+
+```
+```{r}
+# Is the result of the correlation test different when I use the log? (NOT temperature adjusted yet, just log of the data!)
+cor.test(log(biogeochem_sites$nitrogenTot), 
+         log(biogeochem_sites$meanAnnualTemp_C))
+
+```
+
+```{r}
+# Correlation with adjusted log to include the colder sites
+cor.test(log(biogeochem_sites$nitrogenTot + 12.2), 
+         log(biogeochem_sites$meanAnnualTemp_C + 12.2))
+
+```
+
+```{r}
 # Now, do the same thing I did above, but for precipitation!
 # Plot using log so we can get a better look at the relationship
 ggplot(biogeochem_sites, aes(x = log(meanAnnualPrecip_mm), y = log(nitrogenTot))) +
@@ -66,7 +85,18 @@ ggplot(biogeochem_sites, aes(x = log(meanAnnualPrecip_mm), y = log(nitrogenTot))
   geom_smooth(method = "lm") + #linear regression line
   labs(x = "log Mean Annual Precipitation (mm)", y = "log Nitrogen Content")
 
+```
 
+
+```{r}
+# Correlation for mean annual precipitation
+cor.test(log(biogeochem_sites$nitrogenTot), 
+         log(biogeochem_sites$meanAnnualPrecip_mm))
+# for some reason this is not returning a value for the correlation test?
+
+# Trying the test without using log transformation
+cor.test((biogeochem_sites$nitrogenTot), (biogeochem_sites$meanAnnualPrecip_mm))
+# worked this way, so I think this is the data that I will use in my final report
 
 ```
 
