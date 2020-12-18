@@ -63,10 +63,14 @@ ggplot(biogeochem_sites, aes(x = log(meanAnnualTemp_C + 12.2), y = log(nitrogenT
 cor.test((biogeochem_sites$nitrogenTot), (biogeochem_sites$meanAnnualTemp_C))
 
 ```
-```{r}
+```{r, na.rm = FALSE}
 # Is the result of the correlation test different when I use the log? (NOT temperature adjusted yet, just log of the data!)
+
+
 cor.test(log(biogeochem_sites$nitrogenTot), 
          log(biogeochem_sites$meanAnnualTemp_C))
+  
+
 
 ```
 
